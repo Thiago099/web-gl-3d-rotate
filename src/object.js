@@ -78,7 +78,7 @@ function BindSelectionQuadColor(gl,shaderprogram,data)
 
     const faceIndex = color_2_id(data)
 
-    if (faceIndex > 0) {
+    if (faceIndex >= 0) {
         // set selected face to red
         displayColors.set([
             1.0, 0.0, 0.0,
