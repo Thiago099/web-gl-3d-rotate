@@ -308,6 +308,8 @@ var animate = function(time) {
     gl.clearColor(0, 0, 0, 1);
     BindQuadSelectionColorBuffer()
     gl.uniform1f(_IsPickingStep, 0);
+
+
     draw()
     
     const pixelX = mouseX * gl.canvas.width / gl.canvas.clientWidth;
@@ -324,6 +326,7 @@ var animate = function(time) {
 
     BindSelectionQuadColor(gl,shaderprogram,data)
     gl.uniform1f(_IsPickingStep, 1);
+
     draw(data)
     window.requestAnimationFrame(animate);
 }

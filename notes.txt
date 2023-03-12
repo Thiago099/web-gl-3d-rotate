@@ -13,3 +13,16 @@ gl.drawArrays(gl.LINES, 0, vertexCount);
 
 // Disable polygon offset
 gl.disable(gl.POLYGON_OFFSET_FILL);
+
+
+
+
+
+
+
+
+
+
+
+// gl.disable(gl.SAMPLE_COVERAGE)
+// gl.disable(gl.SAMPLE_ALPHA_TO_COVERAGE)
