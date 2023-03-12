@@ -56,6 +56,7 @@ uniform mat4 Vmatrix;
 uniform mat4 Mmatrix;
 uniform mat4 uNormalMatrix;
 varying highp vec3 vLighting;
+uniform float enableLighting;
 
 attribute vec3 color;
 varying vec3 vColor;
@@ -72,7 +73,14 @@ void main(void) {
     highp vec4 transformedNormal = uNormalMatrix * vec4(aVertexNormal, 1.0);
 
     highp float directional = max(dot(transformedNormal.xyz, directionalVector), 0.0);
-    vLighting = ambientLight + (directionalLightColor * directional);
+    if(enableLighting == 0.0)
+    {
+        vLighting = vec3(1.0, 1.0, 1.0);
+    }
+    else
+    {
+        vLighting = ambientLight + (directionalLightColor * directional);
+    }
 }
 `;
 
@@ -84,6 +92,7 @@ void main(void) {
     gl_FragColor = vec4(vColor * vLighting, 1.);
 }
 `;
+
 
 
 var vertShader = gl.createShader(gl.VERTEX_SHADER);
@@ -106,6 +115,9 @@ var _Vmatrix = gl.getUniformLocation(shaderprogram, "Vmatrix");
 var _Mmatrix = gl.getUniformLocation(shaderprogram, "Mmatrix");
 var _normal_matrix = gl.getUniformLocation(shaderprogram, "uNormalMatrix");
 var _VertexNormal = gl.getAttribLocation(shaderprogram, "aVertexNormal")
+
+var _EnableLightning = gl.getUniformLocation(shaderprogram, "enableLighting")
+
 
 BindVertexBuffer(gl,shaderprogram, "position")
 
@@ -289,7 +301,7 @@ var animate = function(time) {
 
     gl.clearColor(0, 0, 0, 1);
     BindQuadSelectionColorBuffer()
-
+    gl.uniform1f(_EnableLightning, 0);
     draw()
     
     const pixelX = mouseX * gl.canvas.width / gl.canvas.clientWidth;
@@ -305,9 +317,8 @@ var animate = function(time) {
         data);             // typed array to hold result
 
     BindSelectionQuadColor(gl,shaderprogram,data)
-
+    gl.uniform1f(_EnableLightning, 1);
     draw(data)
-
     window.requestAnimationFrame(animate);
 }
 animate(0);
