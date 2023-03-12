@@ -20,6 +20,7 @@ void main(void) {
     }
     else
     {
+
         highp vec3 ambientLight = vec3(0.3, 0.3, 0.3);
         
         highp vec3 frontColor = vec3(1, 1, 1);

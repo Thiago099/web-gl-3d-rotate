@@ -149,10 +149,10 @@ function BindSelectionQuadColor(gl,shaderprogram,data)
     if (faceIndex >= 0) {
         // set selected face to red
         displayColors.set([
-            1.0, 0.0, 0.0,
-            1.0, 0.0, 0.0,
-            1.0, 0.0, 0.0,
-            1.0, 0.0, 0.0
+            1.0, 0.8, 0.8,
+            1.0, 0.8, 0.8,
+            1.0, 0.8, 0.8,
+            1.0, 0.8, 0.8
         ], faceIndex*12);
     }
 
