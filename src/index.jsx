@@ -149,6 +149,15 @@ const normalMatrix = mat4.create();
 mat4.invert(normalMatrix, view_matrix);
 mat4.transpose(normalMatrix, normalMatrix);
 
+const  BindQuadSelectionColorBuffer = UseBindQuadSelectionColorBuffer(gl,shaderprogram)
+gl.viewport(0.0, 0.0, canvas.width, canvas.height);
+gl.uniformMatrix4fv(
+    _normal_matrix,
+    false,
+    normalMatrix
+  );
+  BindQuadSelectionColorBuffer()
+
 view_matrix[14] = view_matrix[14]-6;
 
 /*================= Mouse events ======================*/
@@ -238,45 +247,31 @@ PHI = 0;
 var time_old = 0;
 
 
-const  BindQuadSelectionColorBuffer = UseBindQuadSelectionColorBuffer(gl,shaderprogram)
+
+
 const GlDraw = UseDraw(gl)
 function draw()
 {
     gl.enable(gl.DEPTH_TEST);
 
-    // gl.depthFunc(gl.LEQUAL);
-
     gl.clearDepth(1.0);
-    gl.viewport(0.0, 0.0, canvas.width, canvas.height);
-
-
+    
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    gl.uniformMatrix4fv(_Pmatrix, false, proj_matrix);
-    gl.uniformMatrix4fv(_Vmatrix, false, view_matrix);
-    gl.uniformMatrix4fv(_Mmatrix, false, mo_matrix);
-    gl.uniformMatrix4fv(
-        _normal_matrix,
-        false,
-        normalMatrix
-      );
-
+    
     addNormals(gl,_VertexNormal) 
-
+    
     GlDraw(gl)
-
-
-
+    
+    
+    
 }
 
 var animate = function(time) {
-    var dt = time-time_old;
 
     if (!drag) {
         dX *= AMORTIZATION, dY*=AMORTIZATION;
         THETA+=dX, PHI+=dY;
     }
-
 
     //set model matrix to I4
 
@@ -297,7 +292,12 @@ var animate = function(time) {
     rotateX(mo_matrix, PHI);
 
     time_old = time; 
-    
+
+
+    gl.uniformMatrix4fv(_Pmatrix, false, proj_matrix);
+    gl.uniformMatrix4fv(_Vmatrix, false, view_matrix);
+    gl.uniformMatrix4fv(_Mmatrix, false, mo_matrix);
+
 
     gl.clearColor(0, 0, 0, 1);
     BindQuadSelectionColorBuffer()
