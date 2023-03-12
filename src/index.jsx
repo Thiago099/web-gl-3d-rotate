@@ -1,19 +1,8 @@
 
 import './style.css'
-
+import { vertices, colors, normals, indices, color_2_id } from './object.js'
 const canvas = ref()
 
-const data = state({})
-
-
-
-function printData(data) {
-    var result = []
-    for (var key in data) {
-        result.push(<div>{key}: {data[key]}</div>)
-    }
-    return result
-}
 
 
 const main = 
@@ -26,7 +15,6 @@ const main =
         <p>
             Mouse wheel to zoom
         </p>
-        {printData(data)}
     </div>
 </div>
 
@@ -42,37 +30,15 @@ var gl = canvas.__element.getContext('experimental-webgl');
 
 /*========== Defining and storing the geometry ==========*/
 
-var vertices = [
--1,-1,-1, 1,-1,-1, 1, 1,-1, -1, 1,-1,
--1,-1, 1, 1,-1, 1, 1, 1, 1, -1, 1, 1,
--1,-1,-1, -1, 1,-1, -1, 1, 1, -1,-1, 1,
-1,-1,-1, 1, 1,-1, 1, 1, 1, 1,-1, 1,
--1,-1,-1, -1,-1, 1, 1,-1, 1, 1,-1,-1,
--1, 1,-1, -1, 1, 1, 1, 1, 1, 1, 1,-1, 
-];
 
-var colors = [
-5,3,7, 5,3,7, 5,3,7, 5,3,7,
-1,1,3, 1,1,3, 1,1,3, 1,1,3,
-0,0,1, 0,0,1, 0,0,1, 0,0,1,
-1,0,0, 1,0,0, 1,0,0, 1,0,0,
-1,1,0, 1,1,0, 1,1,0, 1,1,0,
-0,1,0, 0,1,0, 0,1,0, 0,1,0 
-];
-
-var indices = [
-0,1,2, 0,2,3, 4,5,6, 4,6,7,
-8,9,10, 8,10,11, 12,13,14, 12,14,15,
-16,17,18, 16,18,19, 20,21,22, 20,22,23 
-];
 
 // Create and store data into vertex buffer
-var vertex_buffer = gl.createBuffer ();
+var vertex_buffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
 // Create and store data into color buffer
-var color_buffer = gl.createBuffer ();
+var color_buffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 
@@ -83,16 +49,18 @@ gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW)
 
 /*=================== SHADERS =================== */
 
-var vertCode = 'attribute vec3 position;'+
-'uniform mat4 Pmatrix;'+
-'uniform mat4 Vmatrix;'+
-'uniform mat4 Mmatrix;'+
-'attribute vec3 color;'+//the color of the point
-'varying vec3 vColor;'+
-'void main(void) { '+//pre-built function
-    'gl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);'+
-    'vColor = color;'+
-'}';
+var vertCode = 
+`attribute vec3 position;
+uniform mat4 Pmatrix;
+uniform mat4 Vmatrix;
+uniform mat4 Mmatrix;
+attribute vec3 color;
+varying vec3 vColor;
+void main(void) { 
+    gl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);
+    vColor = color;
+}
+`;
 
 var fragCode = 'precision mediump float;'+
 'varying vec3 vColor;'+
@@ -123,10 +91,9 @@ var _position = gl.getAttribLocation(shaderprogram, "position");
 gl.vertexAttribPointer(_position, 3, gl.FLOAT, false,0,0);
 gl.enableVertexAttribArray(_position);
 
-gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
-var _color = gl.getAttribLocation(shaderprogram, "color");
-gl.vertexAttribPointer(_color, 3, gl.FLOAT, false,0,0) ;
-gl.enableVertexAttribArray(_color);
+
+
+
 gl.useProgram(shaderprogram);
 
 /*==================== MATRIX ====================== */
@@ -164,8 +131,11 @@ return false;
 var mouseUp = function(e){
 drag = false;
 };
-
+let mouseX , mouseY;
 var mouseMove = function(e) {
+    const rect = canvas.__element.getBoundingClientRect();
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top;
 if (!drag) return false;
 dX = (e.pageX-old_x)*2*Math.PI/canvas.width,
 dY = (e.pageY-old_y)*2*Math.PI/canvas.height;
@@ -229,73 +199,111 @@ m[10] = c*m[10]-s*mv8;
 var THETA = 0,
 PHI = 0;
 var time_old = 0;
+function draw()
+{
+    gl.enable(gl.DEPTH_TEST);
 
-var animate = function(time) {
-var dt = time-time_old;
+    // gl.depthFunc(gl.LEQUAL);
 
-if (!drag) {
-    dX *= AMORTIZATION, dY*=AMORTIZATION;
-    THETA+=dX, PHI+=dY;
+    gl.clearDepth(1.0);
+    gl.viewport(0.0, 0.0, canvas.width, canvas.height);
+
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    gl.uniformMatrix4fv(_Pmatrix, false, proj_matrix);
+    gl.uniformMatrix4fv(_Vmatrix, false, view_matrix);
+    gl.uniformMatrix4fv(_Mmatrix, false, mo_matrix);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
+    gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+
+
 }
+var animate = function(time) {
+    var dt = time-time_old;
+
+    if (!drag) {
+        dX *= AMORTIZATION, dY*=AMORTIZATION;
+        THETA+=dX, PHI+=dY;
+    }
 
 
-//set model matrix to I4
+    //set model matrix to I4
 
-mo_matrix[0] = 1, mo_matrix[1] = 0, mo_matrix[2] = 0,
-mo_matrix[3] = 0,
+    mo_matrix[0] = 1, mo_matrix[1] = 0, mo_matrix[2] = 0,
+    mo_matrix[3] = 0,
 
-mo_matrix[4] = 0, mo_matrix[5] = 1, mo_matrix[6] = 0,
-mo_matrix[7] = 0,
+    mo_matrix[4] = 0, mo_matrix[5] = 1, mo_matrix[6] = 0,
+    mo_matrix[7] = 0,
 
-mo_matrix[8] = 0, mo_matrix[9] = 0, mo_matrix[10] = 1,
-mo_matrix[11] = 0,
+    mo_matrix[8] = 0, mo_matrix[9] = 0, mo_matrix[10] = 1,
+    mo_matrix[11] = 0,
 
-mo_matrix[12] = 0, mo_matrix[13] = 0, mo_matrix[14] = 0,
-mo_matrix[15] = 1;
+    mo_matrix[12] = 0, mo_matrix[13] = 0, mo_matrix[14] = 0,
+    mo_matrix[15] = 1;
 
-PHI = Math.max(-Math.PI/2, Math.min(Math.PI/2, PHI));
-rotateY(mo_matrix, THETA);
-rotateX(mo_matrix, PHI);
+    PHI = Math.max(-Math.PI/2, Math.min(Math.PI/2, PHI));
+    rotateY(mo_matrix, THETA);
+    rotateX(mo_matrix, PHI);
 
-time_old = time; 
-gl.enable(gl.DEPTH_TEST);
+    time_old = time; 
+    
+    gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
+    var _color = gl.getAttribLocation(shaderprogram, "color");
+    gl.vertexAttribPointer(_color, 3, gl.FLOAT, false,0,0) ;
+    gl.enableVertexAttribArray(_color);
+    gl.clearColor(0, 0, 0, 1);
+    draw()
+    
+    const pixelX = mouseX * gl.canvas.width / gl.canvas.clientWidth;
+    const pixelY = gl.canvas.height - mouseY * gl.canvas.height / gl.canvas.clientHeight - 1;
+    const data = new Uint8Array(4);
+    gl.readPixels(
+        pixelX,            // x
+        pixelY,            // y
+        1,                 // width
+        1,                 // height
+        gl.RGBA,           // format
+        gl.UNSIGNED_BYTE,  // type
+        data);             // typed array to hold result
 
-// gl.depthFunc(gl.LEQUAL);
+    var _color = gl.getAttribLocation(shaderprogram, "color");
+    gl.vertexAttribPointer(_color, 3, gl.FLOAT, false,0,0) ;
+    gl.enableVertexAttribArray(_color);
 
-gl.clearColor(0.5, 0.5, 0.5, 0.9);
-gl.clearDepth(1.0);
-gl.viewport(0.0, 0.0, canvas.width, canvas.height);
-gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-gl.uniformMatrix4fv(_Pmatrix, false, proj_matrix);
-gl.uniformMatrix4fv(_Vmatrix, false, view_matrix);
-gl.uniformMatrix4fv(_Mmatrix, false, mo_matrix);
+    
+    var displayColors = new Float32Array(6*12); // assuming 24 faces
+    displayColors.fill(1); // set all faces to white
+    
+    const faceIndex = color_2_id(data)
 
-gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
-gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+    if (faceIndex > 0) {
+        // set selected face to red
+        displayColors.set([
+            1.0, 0.0, 0.0,
+            1.0, 0.0, 0.0,
+            1.0, 0.0, 0.0,
+            1.0, 0.0, 0.0
+        ], (faceIndex-1)*12);
+    }
 
-window.requestAnimationFrame(animate);
+
+    var display_color_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, display_color_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(displayColors), gl.STATIC_DRAW);
+
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, display_color_buffer);
+    var _color = gl.getAttribLocation(shaderprogram, "color");
+    gl.vertexAttribPointer(_color, 3, gl.FLOAT, false,0,0) ;
+    gl.enableVertexAttribArray(_color);
+
+    gl.clearColor(0.5, 0.5, 0.5, 0.9);
+    draw()
+
+    window.requestAnimationFrame(animate);
 }
 animate(0);
 
-
-
-
-
-// canvas.$on("mousemove", collision);
-
-function collision(e)
-{
-    var {x,y} = getMousePos(canvas, e);
-    data.x = x;
-    data.y = y;
-}
-
-
-function getMousePos(canvas, evt) {
-    var rect = canvas.__element.getBoundingClientRect();
-    return {
-        x: evt.clientX - rect.left,
-        y: evt.clientY - rect.top
-    };
-}
