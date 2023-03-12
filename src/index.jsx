@@ -1,8 +1,7 @@
 
 import './style.css'
-import { vertices, colors, normals, indices, color_2_id } from './object.js'
+import {BindVertexBuffer, BindSelectionQuadColor, UseBindQuadSelectionColorBuffer,UseDraw} from './object.js'
 const canvas = ref()
-
 
 
 const main = 
@@ -26,31 +25,30 @@ main.$parent(document.body)
 
 
 /*============= Creating a canvas ======================*/
-var gl = canvas.__element.getContext('experimental-webgl');
+var gl = canvas.__element.getContext('webgl');
 
 /*========== Defining and storing the geometry ==========*/
 
 
 
-// Create and store data into vertex buffer
-var vertex_buffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
 // Create and store data into color buffer
-var color_buffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+
 
 // Create and store data into index buffer
-var index_buffer = gl.createBuffer ();
-gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
-gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+
+
+// // Create and store data into index buffer
+// var normal_buffer = gl.createBuffer ();
+// gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, normal_buffer);
+// gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(normals), gl.STATIC_DRAW);
+
 
 /*=================== SHADERS =================== */
 
 var vertCode = 
-`attribute vec3 position;
+`
+attribute vec3 position;
 uniform mat4 Pmatrix;
 uniform mat4 Vmatrix;
 uniform mat4 Mmatrix;
@@ -86,12 +84,13 @@ var _Pmatrix = gl.getUniformLocation(shaderprogram, "Pmatrix");
 var _Vmatrix = gl.getUniformLocation(shaderprogram, "Vmatrix");
 var _Mmatrix = gl.getUniformLocation(shaderprogram, "Mmatrix");
 
-gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-var _position = gl.getAttribLocation(shaderprogram, "position");
-gl.vertexAttribPointer(_position, 3, gl.FLOAT, false,0,0);
-gl.enableVertexAttribArray(_position);
 
+BindVertexBuffer(gl,shaderprogram, "position")
 
+// gl.bindBuffer(gl.ARRAY_BUFFER, normal_buffer);
+// var _normal = gl.getAttribLocation(shaderprogram, "normal");
+// gl.vertexAttribPointer(_normal, 3, gl.FLOAT, false,0,0);
+// gl.enableVertexAttribArray(_normal);
 
 
 gl.useProgram(shaderprogram);
@@ -199,6 +198,10 @@ m[10] = c*m[10]-s*mv8;
 var THETA = 0,
 PHI = 0;
 var time_old = 0;
+
+
+const  BindQuadSelectionColorBuffer = UseBindQuadSelectionColorBuffer(gl,shaderprogram)
+const GlDraw = UseDraw(gl)
 function draw()
 {
     gl.enable(gl.DEPTH_TEST);
@@ -215,8 +218,8 @@ function draw()
     gl.uniformMatrix4fv(_Vmatrix, false, view_matrix);
     gl.uniformMatrix4fv(_Mmatrix, false, mo_matrix);
 
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
-    gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+    GlDraw(gl)
+
 
 
 }
@@ -249,11 +252,9 @@ var animate = function(time) {
 
     time_old = time; 
     
-    gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
-    var _color = gl.getAttribLocation(shaderprogram, "color");
-    gl.vertexAttribPointer(_color, 3, gl.FLOAT, false,0,0) ;
-    gl.enableVertexAttribArray(_color);
+
     gl.clearColor(0, 0, 0, 1);
+    BindQuadSelectionColorBuffer()
     draw()
     
     const pixelX = mouseX * gl.canvas.width / gl.canvas.clientWidth;
@@ -268,40 +269,9 @@ var animate = function(time) {
         gl.UNSIGNED_BYTE,  // type
         data);             // typed array to hold result
 
-    var _color = gl.getAttribLocation(shaderprogram, "color");
-    gl.vertexAttribPointer(_color, 3, gl.FLOAT, false,0,0) ;
-    gl.enableVertexAttribArray(_color);
+    BindSelectionQuadColor(gl,shaderprogram,data)
 
-
-    
-    var displayColors = new Float32Array(6*12); // assuming 24 faces
-    displayColors.fill(1); // set all faces to white
-    
-    const faceIndex = color_2_id(data)
-
-    if (faceIndex > 0) {
-        // set selected face to red
-        displayColors.set([
-            1.0, 0.0, 0.0,
-            1.0, 0.0, 0.0,
-            1.0, 0.0, 0.0,
-            1.0, 0.0, 0.0
-        ], (faceIndex-1)*12);
-    }
-
-
-    var display_color_buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, display_color_buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(displayColors), gl.STATIC_DRAW);
-
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, display_color_buffer);
-    var _color = gl.getAttribLocation(shaderprogram, "color");
-    gl.vertexAttribPointer(_color, 3, gl.FLOAT, false,0,0) ;
-    gl.enableVertexAttribArray(_color);
-
-    gl.clearColor(0.5, 0.5, 0.5, 0.9);
-    draw()
+    draw(data)
 
     window.requestAnimationFrame(animate);
 }
