@@ -1,6 +1,7 @@
 
 import './style.css'
-import {BindVertexBuffer, BindSelectionQuadColor, UseBindQuadSelectionColorBuffer,UseDraw} from './object.js'
+import {BindVertexBuffer, BindSelectionQuadColor, UseBindQuadSelectionColorBuffer,UseDraw,addNormals} from './object.js'
+import {mat4} from 'gl-matrix'
 const canvas = ref()
 
 
@@ -46,25 +47,43 @@ var gl = canvas.__element.getContext('webgl');
 
 /*=================== SHADERS =================== */
 
-var vertCode = 
-`
+var vertCode = `
 attribute vec3 position;
+attribute vec3 aVertexNormal;
+
 uniform mat4 Pmatrix;
 uniform mat4 Vmatrix;
 uniform mat4 Mmatrix;
+uniform mat4 uNormalMatrix;
+varying highp vec3 vLighting;
+
 attribute vec3 color;
 varying vec3 vColor;
 void main(void) { 
     gl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);
     vColor = color;
+
+    // Apply lighting effect
+
+    highp vec3 ambientLight = vec3(0.3, 0.3, 0.3);
+    highp vec3 directionalLightColor = vec3(1, 1, 1);
+    highp vec3 directionalVector = normalize(vec3(0.85, 0.8, 0.75));
+
+    highp vec4 transformedNormal = uNormalMatrix * vec4(aVertexNormal, 1.0);
+
+    highp float directional = max(dot(transformedNormal.xyz, directionalVector), 0.0);
+    vLighting = ambientLight + (directionalLightColor * directional);
 }
 `;
 
-var fragCode = 'precision mediump float;'+
-'varying vec3 vColor;'+
-'void main(void) {'+
-    'gl_FragColor = vec4(vColor, 1.);'+
-'}';
+var fragCode = `
+precision mediump float;
+varying vec3 vColor;
+varying highp vec3 vLighting;
+void main(void) {
+    gl_FragColor = vec4(vColor * vLighting, 1.);
+}
+`;
 
 var vertShader = gl.createShader(gl.VERTEX_SHADER);
 gl.shaderSource(vertShader, vertCode);
@@ -83,6 +102,9 @@ gl.linkProgram(shaderprogram);
 var _Pmatrix = gl.getUniformLocation(shaderprogram, "Pmatrix");
 var _Vmatrix = gl.getUniformLocation(shaderprogram, "Vmatrix");
 var _Mmatrix = gl.getUniformLocation(shaderprogram, "Mmatrix");
+var _normal_matrix = gl.getUniformLocation(shaderprogram, "uNormalMatrix");
+var _VertexNormal = gl.getAttribLocation(shaderprogram, "aVertexNormal")
+
 
 
 BindVertexBuffer(gl,shaderprogram, "position")
@@ -110,6 +132,10 @@ return [
 var proj_matrix = get_projection(40, canvas.width/canvas.height, 1, 100);
 var mo_matrix = [ 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 ];
 var view_matrix = [ 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 ];
+
+const normalMatrix = mat4.create();
+mat4.invert(normalMatrix, view_matrix);
+mat4.transpose(normalMatrix, normalMatrix);
 
 view_matrix[14] = view_matrix[14]-6;
 
@@ -217,6 +243,13 @@ function draw()
     gl.uniformMatrix4fv(_Pmatrix, false, proj_matrix);
     gl.uniformMatrix4fv(_Vmatrix, false, view_matrix);
     gl.uniformMatrix4fv(_Mmatrix, false, mo_matrix);
+    gl.uniformMatrix4fv(
+        _normal_matrix,
+        false,
+        normalMatrix
+      );
+
+    addNormals(gl,_VertexNormal) 
 
     GlDraw(gl)
 

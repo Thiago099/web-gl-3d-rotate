@@ -1,26 +1,63 @@
 var indices = [
-    0,1,2, 0,2,3, 4,5,6, 4,6,7,
-    8,9,10, 8,10,11, 12,13,14, 12,14,15,
-    16,17,18, 16,18,19, 20,21,22, 20,22,23 
+    0,
+    1,
+    2,
+    0,
+    2,
+    3, // front
+    4,
+    5,
+    6,
+    4,
+    6,
+    7, // back
+    8,
+    9,
+    10,
+    8,
+    10,
+    11, // top
+    12,
+    13,
+    14,
+    12,
+    14,
+    15, // bottom
+    16,
+    17,
+    18,
+    16,
+    18,
+    19, // right
+    20,
+    21,
+    22,
+    20,
+    22,
+    23, // left
 ];
-var normals = [
-    0,0,-1, 0,0,-1, 0,0,-1, 0,0,-1,
-    0,0,1, 0,0,1, 0,0,1, 0,0,1,
-    -1,0,0, -1,0,0, -1,0,0, -1,0,0,
-    1,0,0, 1,0,0, 1,0,0, 1,0,0,
-    0,-1,0, 0,-1,0, 0,-1,0, 0,-1,0,
-    0,1,0, 0,1,0, 0,1,0, 0,1,0,
-];
+
 
 function BindVertexBuffer(gl,shaderprogram, variable)
 {
     var vertices = [
-        -1,-1,-1, 1,-1,-1, 1, 1,-1, -1, 1,-1,
-        -1,-1, 1, 1,-1, 1, 1, 1, 1, -1, 1, 1,
-        -1,-1,-1, -1, 1,-1, -1, 1, 1, -1,-1, 1,
-        1,-1,-1, 1, 1,-1, 1, 1, 1, 1,-1, 1,
-        -1,-1,-1, -1,-1, 1, 1,-1, 1, 1,-1,-1,
-        -1, 1,-1, -1, 1, 1, 1, 1, 1, 1, 1,-1, 
+        // Front face
+        -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0,
+
+        // Back face
+        -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0,
+
+        // Top face
+        -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0,
+
+        // Bottom face
+        -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0,
+
+        // Right face
+        1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0,
+
+        // Left face
+        -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0,
     ];
     var vertex_buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
@@ -31,6 +68,37 @@ function BindVertexBuffer(gl,shaderprogram, variable)
     gl.enableVertexAttribArray(_position);
 }
 
+
+function BindNormalBuffer(gl,shaderprogram, variable)
+{
+
+    const normals = [
+        // Front
+        0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
+
+        // Back
+        0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0,
+
+        // Top
+        0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+
+        // Bottom
+        0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0,
+
+        // Right
+        1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+
+        // Left
+        -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0,
+      ];
+    var normal_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, normal_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+
+    var _normal = gl.getAttribLocation(shaderprogram, variable);
+    gl.vertexAttribPointer(_normal, 3, gl.FLOAT, false,0,0);
+    gl.enableVertexAttribArray(_normal);
+}
 
 function UseDraw(gl)
 {
@@ -117,7 +185,53 @@ function color_2_id(color)
         (color[2] << 16)
     ) - 1
 }
+function addNormals(gl,_VertexNormal) {
+    const normalBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+  
+    const vertexNormals = [
+      // Front
+      0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
+  
+      // Back
+      0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0,
+  
+      // Top
+      0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+  
+      // Bottom
+      0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0,
+  
+      // Right
+      1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+  
+      // Left
+      -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0,
+    ];
+  
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array(vertexNormals),
+      gl.STATIC_DRAW
+    );
+
+    const numComponents = 3;
+    const type = gl.FLOAT;
+    const normalize = false;
+    const stride = 0;
+    const offset = 0;
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+    gl.vertexAttribPointer(
+      _VertexNormal,
+      numComponents,
+      type,
+      normalize,
+      stride,
+      offset
+    );
+    gl.enableVertexAttribArray(_VertexNormal);
+  
+  }
 
 
-
-export {BindVertexBuffer, BindSelectionQuadColor, UseBindQuadSelectionColorBuffer, UseDraw}
+export {BindVertexBuffer, BindSelectionQuadColor, UseBindQuadSelectionColorBuffer, UseDraw, BindNormalBuffer, addNormals}
