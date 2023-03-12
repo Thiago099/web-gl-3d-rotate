@@ -15,6 +15,9 @@ const main =
         <p>
             Mouse wheel to zoom
         </p>
+        <p>
+            Hover the mouse over the cube to highlight its faces
+        </p>
     </div>
 </div>
 
