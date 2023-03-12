@@ -85,6 +85,7 @@ void main(void) {
 }
 `;
 
+
 var vertShader = gl.createShader(gl.VERTEX_SHADER);
 gl.shaderSource(vertShader, vertCode);
 gl.compileShader(vertShader);
@@ -95,6 +96,7 @@ gl.compileShader(fragShader);
 
 var shaderprogram = gl.createProgram();
 gl.attachShader(shaderprogram, vertShader);
+
 gl.attachShader(shaderprogram, fragShader);
 gl.linkProgram(shaderprogram);
 
@@ -104,8 +106,6 @@ var _Vmatrix = gl.getUniformLocation(shaderprogram, "Vmatrix");
 var _Mmatrix = gl.getUniformLocation(shaderprogram, "Mmatrix");
 var _normal_matrix = gl.getUniformLocation(shaderprogram, "uNormalMatrix");
 var _VertexNormal = gl.getAttribLocation(shaderprogram, "aVertexNormal")
-
-
 
 BindVertexBuffer(gl,shaderprogram, "position")
 
@@ -256,6 +256,7 @@ function draw()
 
 
 }
+
 var animate = function(time) {
     var dt = time-time_old;
 
@@ -288,6 +289,7 @@ var animate = function(time) {
 
     gl.clearColor(0, 0, 0, 1);
     BindQuadSelectionColorBuffer()
+
     draw()
     
     const pixelX = mouseX * gl.canvas.width / gl.canvas.clientWidth;
