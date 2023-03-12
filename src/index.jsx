@@ -74,7 +74,7 @@ var _projection_matrix = gl.getUniformLocation(shaderprogram, "projection_matrix
 var _view_matrix = gl.getUniformLocation(shaderprogram, "view_matrix");
 var _model_matrix = gl.getUniformLocation(shaderprogram, "model_matrix");
 var _normal_matrix = gl.getUniformLocation(shaderprogram, "uNormalMatrix");
-var _VertexNormal = gl.getAttribLocation(shaderprogram, "aVertexNormal")
+var _VertexNormal = gl.getAttribLocation(shaderprogram, "normal")
 
 var _IsPickingStep = gl.getUniformLocation(shaderprogram, "isPickingStep")
 

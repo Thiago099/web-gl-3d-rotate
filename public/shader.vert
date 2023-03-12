@@ -1,15 +1,16 @@
 attribute vec3 position;
-attribute vec3 aVertexNormal;
+attribute vec3 normal;
 
 uniform mat4 projection_matrix;
 uniform mat4 view_matrix;
 uniform mat4 model_matrix;
 uniform mat4 uNormalMatrix;
-varying highp vec3 vLighting;
 uniform float isPickingStep;
 
 attribute vec3 color;
 varying vec3 vColor;
+
+varying highp vec3 vLighting;
 void main(void) { 
 
 
@@ -32,7 +33,7 @@ void main(void) {
         highp vec3 frontVector = normalize(vec3(0.85, 0.8, 0.75));
         highp vec3 backVector = normalize(vec3(-0.85, -0.8, -0.75));
 
-        highp vec4 transformedNormal = uNormalMatrix * vec4(aVertexNormal, 1.0);
+        highp vec4 transformedNormal = uNormalMatrix * vec4(normal, 1.0);
 
         highp float directional = max(dot(transformedNormal.xyz, frontVector), 0.0);
         highp float directional2 = max(dot(transformedNormal.xyz, backVector), 0.0);

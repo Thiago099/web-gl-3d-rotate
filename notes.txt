@@ -2,8 +2,7 @@
 gl.drawArrays(gl.TRIANGLES, 0, vertexCount);
 
 // Enable polygon offset
-gl.enable(gl.POLYGON_OFFSET_FILL);
-gl.polygonOffset(1, 1);
+
 
 // Set line width
 gl.lineWidth(2);
@@ -12,7 +11,7 @@ gl.lineWidth(2);
 gl.drawArrays(gl.LINES, 0, vertexCount);
 
 // Disable polygon offset
-gl.disable(gl.POLYGON_OFFSET_FILL);
+
 
 
 

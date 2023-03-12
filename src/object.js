@@ -111,9 +111,13 @@ function UseDraw(gl)
     {
         // line width
         gl.lineWidth(2.0);
-        // gl.drawElements(gl.LINE_LOOP, indices.length, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.LINE_LOOP, indices.length, gl.UNSIGNED_SHORT, 0);
+        // expand the geometry
+        gl.enable(gl.POLYGON_OFFSET_FILL);
+        gl.polygonOffset(1, 1);
         gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 
+        gl.disable(gl.POLYGON_OFFSET_FILL);
     }
 }
 
