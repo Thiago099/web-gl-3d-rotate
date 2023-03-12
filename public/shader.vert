@@ -1,9 +1,9 @@
 attribute vec3 position;
 attribute vec3 aVertexNormal;
 
-uniform mat4 Pmatrix;
-uniform mat4 Vmatrix;
-uniform mat4 Mmatrix;
+uniform mat4 projection_matrix;
+uniform mat4 view_matrix;
+uniform mat4 model_matrix;
 uniform mat4 uNormalMatrix;
 varying highp vec3 vLighting;
 uniform float isPickingStep;
@@ -11,7 +11,10 @@ uniform float isPickingStep;
 attribute vec3 color;
 varying vec3 vColor;
 void main(void) { 
-    gl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);
+
+
+        
+    gl_Position = projection_matrix*view_matrix*model_matrix*vec4(position, 1.);
     vColor = color;
 
     if(isPickingStep == 0.0)

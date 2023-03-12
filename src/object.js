@@ -105,10 +105,15 @@ function UseDraw(gl)
     var index_buffer = gl.createBuffer ();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+    gl.getParameter(gl.ALIASED_LINE_WIDTH_RANGE)
 
     return () =>
     {
+        // line width
+        gl.lineWidth(2.0);
+        // gl.drawElements(gl.LINE_LOOP, indices.length, gl.UNSIGNED_SHORT, 0);
         gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+
     }
 }
 

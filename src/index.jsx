@@ -70,9 +70,9 @@ gl.attachShader(shaderprogram, fragShader);
 gl.linkProgram(shaderprogram);
 
 /*======== Associating attributes to vertex shader =====*/
-var _Pmatrix = gl.getUniformLocation(shaderprogram, "Pmatrix");
-var _Vmatrix = gl.getUniformLocation(shaderprogram, "Vmatrix");
-var _Mmatrix = gl.getUniformLocation(shaderprogram, "Mmatrix");
+var _projection_matrix = gl.getUniformLocation(shaderprogram, "projection_matrix");
+var _view_matrix = gl.getUniformLocation(shaderprogram, "view_matrix");
+var _model_matrix = gl.getUniformLocation(shaderprogram, "model_matrix");
 var _normal_matrix = gl.getUniformLocation(shaderprogram, "uNormalMatrix");
 var _VertexNormal = gl.getAttribLocation(shaderprogram, "aVertexNormal")
 
@@ -251,9 +251,9 @@ var animate = function(time) {
     time_old = time; 
 
 
-    gl.uniformMatrix4fv(_Pmatrix, false, proj_matrix);
-    gl.uniformMatrix4fv(_Vmatrix, false, view_matrix);
-    gl.uniformMatrix4fv(_Mmatrix, false, mo_matrix);
+    gl.uniformMatrix4fv(_projection_matrix, false, proj_matrix);
+    gl.uniformMatrix4fv(_view_matrix, false, view_matrix);
+    gl.uniformMatrix4fv(_model_matrix, false, mo_matrix);
 
 
     gl.clearColor(0, 0, 0, 1);
