@@ -56,7 +56,6 @@ const {update, mouse} = useCamera(canvas, builder, gl)
 
 function draw()
 {
-    update()
     gl.enable(gl.DEPTH_TEST);
 
     gl.clearDepth(1.0);
@@ -68,6 +67,8 @@ function draw()
 
 var animate = function() {
 
+    update()
+    
     gl.clearColor(0, 0, 0, 0);
 
     builder.attribute_matrix_4_float.color = cube_id_map;
@@ -83,8 +84,6 @@ var animate = function() {
     window.requestAnimationFrame(animate);
 }
 animate(0);
-
-
 }
 
 process()
