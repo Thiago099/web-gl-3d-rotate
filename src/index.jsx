@@ -4,6 +4,7 @@ import {vertexPosition, GetCubeSelectionColor, GetCubeIdMap,vertexIndexes,vertex
 
 import { webgl } from './bin/gl-builder'
 import { useCamera } from './bin/camera'
+import { step } from './bin/utils'
 
 const canvas = ref()
 
@@ -30,60 +31,54 @@ main.$parent(document.body)
 
 
 async function process(){
-var vertCode = await fetch("./shader.vert").then(res=>res.text())
-var fragCode = await fetch("./shader.frag").then(res=>res.text())
+    var vertCode = await fetch("./shader.vert").then(res=>res.text())
+    var fragCode = await fetch("./shader.frag").then(res=>res.text())
 
 
+    var shader_builder = webgl(canvas.__element)
 
+    var [gl, builder] = 
+        shader_builder
+        .vertexShader(vertCode)
+        .fragmentShader(fragCode)
+        .build()
 
+    builder.attribute_matrix_3_float.normal = vertexNormals
+    builder.attribute_matrix_3_float.position = vertexPosition;
+    builder.face = vertexIndexes
 
-var shader_builder = webgl(canvas.__element)
+    const  cube_id_map = GetCubeIdMap()
 
-var [gl, builder] = 
-    shader_builder
-    .vertexShader(vertCode)
-    .fragmentShader(fragCode)
-    .build()
+    const {update, mouse} = useCamera(canvas, builder, gl)
 
+    function draw()
+    {
+        gl.enable(gl.DEPTH_TEST);
 
-builder.attribute_matrix_3_float.normal = vertexNormals
-builder.attribute_matrix_3_float.position = vertexPosition;
-builder.face = vertexIndexes
+        gl.clearDepth(1.0);
+        
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        
+        builder.drawSolid()
+    }
 
-const  cube_id_map = GetCubeIdMap()
+    step(() => {
 
-const {update, mouse} = useCamera(canvas, builder, gl)
+        update()
 
-function draw()
-{
-    gl.enable(gl.DEPTH_TEST);
+        gl.clearColor(0, 0, 0, 0);
 
-    gl.clearDepth(1.0);
-    
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    
-    builder.drawSolid()
-}
+        builder.attribute_matrix_4_float.color = cube_id_map;
 
-var animate = function() {
+        builder.uniform_float.is_picking_step = 1
 
-    update()
-    
-    gl.clearColor(0, 0, 0, 0);
-
-    builder.attribute_matrix_4_float.color = cube_id_map;
-
-    builder.uniform_float.is_picking_step = 1
-
-    draw()
-    
-    builder.attribute_matrix_4_float.color = GetCubeSelectionColor(builder.getPixel(mouse.x, mouse.y));
-    builder.uniform_float.is_picking_step = 0
-    gl.clearColor(0.5, 0.5, 0.5, 0.9);
-    draw()
-    window.requestAnimationFrame(animate);
-}
-animate(0);
+        draw()
+        
+        builder.attribute_matrix_4_float.color = GetCubeSelectionColor(builder.getPixel(mouse.x, mouse.y));
+        builder.uniform_float.is_picking_step = 0
+        gl.clearColor(0.5, 0.5, 0.5, 0.9);
+        draw()
+    })
 }
 
 process()
