@@ -44,13 +44,23 @@ class attributeBuilder
             this.gl.uniform1f(location, value)
         })
 
-        this.attribute = varProxy((name, value) => {
+        this.attribute_3_float = varProxy((name, value) => {
             var vertex_buffer = this.gl.createBuffer();
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vertex_buffer);
             this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(value), this.gl.STATIC_DRAW);
         
             var attribute = this.gl.getAttribLocation(this.program, name);
             this.gl.vertexAttribPointer(attribute, 3, this.gl.FLOAT, false,0,0);
+            this.gl.enableVertexAttribArray(attribute);
+        })
+
+        this.attribute_4_float = varProxy((name, value) => {
+            var vertex_buffer = this.gl.createBuffer();
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vertex_buffer);
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(value), this.gl.STATIC_DRAW);
+        
+            var attribute = this.gl.getAttribLocation(this.program, name);
+            this.gl.vertexAttribPointer(attribute, 4, this.gl.FLOAT, false,0,0);
             this.gl.enableVertexAttribArray(attribute);
         })
     }

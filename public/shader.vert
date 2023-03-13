@@ -1,6 +1,6 @@
 attribute vec3 position;
 attribute vec3 normal;
-attribute vec3 color;
+attribute vec4 color;
 
 uniform mat4 projection_matrix;
 uniform mat4 view_matrix;
@@ -8,7 +8,7 @@ uniform mat4 model_matrix;
 uniform mat4 uNormalMatrix;
 uniform float is_picking_step;
 
-varying vec3 vColor;
+varying vec4 vColor;
 varying highp vec3 vLighting;
 
 void main(void) { 

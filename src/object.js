@@ -16,7 +16,7 @@ function GetCubeIdMap()
 
 function GetCubeSelectionColor(data)
 {
-    var displayColors = new Float32Array(6*12); // assuming 24 faces
+    var displayColors = new Float32Array(8*12); // assuming 24 faces
     displayColors.fill(1); // set all faces to white
 
     const faceIndex = color_2_id(data)
@@ -24,11 +24,11 @@ function GetCubeSelectionColor(data)
     if (faceIndex >= 0) {
         // set selected face to red
         displayColors.set([
-            1.0, 0.6, 0.6,
-            1.0, 0.6, 0.6,
-            1.0, 0.6, 0.6,
-            1.0, 0.6, 0.8
-        ], faceIndex*12);
+            1.0, 0.6, 0.6, 1.0,
+            1.0, 0.6, 0.6, 1.0,
+            1.0, 0.6, 0.6, 1.0,
+            1.0, 0.6, 0.8, 1.0,
+        ], faceIndex*16);
     }
     return displayColors;
 }
@@ -39,6 +39,7 @@ function id_2_color(id)
         ((id >>  0) & 0xFF) / 0xFF,
         ((id >>  8) & 0xFF) / 0xFF,
         ((id >> 16) & 0xFF) / 0xFF,
+        ((id >> 24) & 0xFF) / 0xFF,
     ]
 }
 function color_2_id(color)
@@ -46,7 +47,8 @@ function color_2_id(color)
     return (
         color[0] +
         (color[1] <<  8 ) +
-        (color[2] << 16)
+        (color[2] << 16) +
+        (color[3] << 24)
     ) - 1
 }
 

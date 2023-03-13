@@ -45,8 +45,8 @@ var [gl, builder] =
     .build()
 
 
-builder.attribute.normal = vertexNormals
-builder.attribute.position = vertexPosition;
+builder.attribute_3_float.normal = vertexNormals
+builder.attribute_3_float.position = vertexPosition;
 builder.face = vertexIndexes
 
 const  cube_id_map = GetCubeIdMap()
@@ -208,9 +208,9 @@ var animate = function(time) {
     builder.uniform_4_float.model_matrix = mo_matrix
 
 
-    gl.clearColor(0, 0, 0, 1);
+    gl.clearColor(0, 0, 0, 0);
 
-    builder.attribute.color = cube_id_map;
+    builder.attribute_4_float.color = cube_id_map;
 
     builder.uniform_1_float.is_picking_step = 1
 
@@ -220,7 +220,7 @@ var animate = function(time) {
     const pixelX = mouseX * gl.canvas.width / gl.canvas.clientWidth;
     const pixelY = gl.canvas.height - mouseY * gl.canvas.height / gl.canvas.clientHeight - 1;
 
-    builder.attribute.color = GetCubeSelectionColor(builder.getPixel(pixelX, pixelY));
+    builder.attribute_4_float.color = GetCubeSelectionColor(builder.getPixel(pixelX, pixelY));
     builder.uniform_1_float.is_picking_step = 0
     gl.clearColor(0.5, 0.5, 0.5, 0.9);
     draw()
