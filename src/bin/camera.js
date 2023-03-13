@@ -70,11 +70,13 @@ function useCamera(canvas,builder,gl)
     var mouseWheel = function(e) {
         e.preventDefault();
         var delta = e.wheelDelta ? e.wheelDelta/40 : e.detail ? -e.detail : 0;
-        if (delta) zoom(delta * 0.1);
+        var amount = 1.3
+        if (delta) zoom(delta < 0 ? 1*amount : 1/amount);
         return e.preventDefault() && false;
     };
     function zoom(z) {
-        view_matrix[14] += z;
+       
+        view_matrix[14] *= z;
     }
     canvas.$on("wheel", mouseWheel);
 
