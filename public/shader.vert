@@ -8,12 +8,11 @@ uniform mat4 model_matrix;
 uniform mat4 uNormalMatrix;
 uniform float is_picking_step;
 
-varying vec4 vColor;
+varying highp vec4 vColor;
 varying highp vec3 vLighting;
 
 void main(void) { 
 
-        
     gl_Position = projection_matrix*view_matrix*model_matrix*vec4(position, 1.);
     vColor = color;
 

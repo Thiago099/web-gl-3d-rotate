@@ -24,7 +24,7 @@ function useCamera(canvas,builder,gl)
 
     gl.viewport(0.0, 0.0, canvas.width, canvas.height);
 
-    builder.uniform_4_float.uNormalMatrix = normalMatrix
+    builder.attribute_matrix_4_mat_float.uNormalMatrix = normalMatrix
 
     view_matrix[14] = view_matrix[14]-6;
 
@@ -143,9 +143,9 @@ function useCamera(canvas,builder,gl)
         rotateX(mo_matrix, PHI);
 
 
-        builder.uniform_4_float.projection_matrix = proj_matrix
-        builder.uniform_4_float.view_matrix = view_matrix
-        builder.uniform_4_float.model_matrix = mo_matrix
+        builder.attribute_matrix_4_mat_float.projection_matrix = proj_matrix
+        builder.attribute_matrix_4_mat_float.view_matrix = view_matrix
+        builder.attribute_matrix_4_mat_float.model_matrix = mo_matrix
     }
     return {update,mouse}
 }

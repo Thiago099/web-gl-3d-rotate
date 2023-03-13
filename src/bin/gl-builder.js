@@ -35,13 +35,17 @@ class attributeBuilder
         this.gl = gl;
         this.program = program;
 
-        this.uniform_4_float = varProxy((name, value) => {
+        this.attribute_matrix_4_mat_float = varProxy((name, value) => {
             var location = this.gl.getUniformLocation(this.program, name)
             this.gl.uniformMatrix4fv(location, false, value)
         })
         this.uniform_float = varProxy((name, value) => {
             var location = this.gl.getUniformLocation(this.program, name)
             this.gl.uniform1f(location, value)
+        })
+        this.uniform_4_float = varProxy((name, value) => {
+            var location = this.gl.getUniformLocation(this.program, name)
+            this.gl.uniform4f(location, value[0], value[1], value[2], value[3])
         })
 
         this.attribute_matrix_3_float = varProxy((name, value) => {
@@ -66,9 +70,6 @@ class attributeBuilder
     }
     set face(faces)
     {
-        var index_buffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, index_buffer);
-        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(faces), this.gl.STATIC_DRAW);
         this.faces = faces;
     }
 
@@ -85,13 +86,39 @@ class attributeBuilder
             data);              // typed array to hold result
         return data;
     }
-    drawSolid()
+    drawSolid(faces)
     {
-        if(this.faces == undefined)
-            throw "No faces defined";
+        if(!faces)
+        {
+            if(this.faces == undefined)
+                throw "No faces defined";
+            else
+                faces = this.faces;
+        }
+
+        var index_buffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, index_buffer);
+        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(faces), this.gl.STATIC_DRAW);
 
         this.gl.getParameter(this.gl.ALIASED_LINE_WIDTH_RANGE)
-        this.gl.drawElements(this.gl.TRIANGLES, this.faces.length, this.gl.UNSIGNED_SHORT, 0);
+        this.gl.drawElements(this.gl.TRIANGLES, faces.length, this.gl.UNSIGNED_SHORT, 0);
+    }
+    drawLines(faces)
+    {
+        if(!faces)
+        {
+            if(this.faces == undefined)
+                throw "No faces defined";
+            else
+                faces = this.faces;
+        }
+
+        var index_buffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, index_buffer);
+        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(faces), this.gl.STATIC_DRAW);
+
+        this.gl.getParameter(this.gl.ALIASED_LINE_WIDTH_RANGE)
+        this.gl.drawElements(this.gl.LINES, faces.length, this.gl.UNSIGNED_SHORT, 0);
     }
 }
 

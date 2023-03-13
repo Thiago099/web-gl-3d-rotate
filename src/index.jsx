@@ -1,6 +1,6 @@
 
 import './style.css'
-import {vertexPosition, GetCubeSelectionColor, GetCubeIdMap,vertexIndexes,vertexNormals} from './object.js'
+import {vertexPosition, GetCubeSelectionColor, GetCubeIdMap,vertexIndexes,wireframeIndexes,vertexNormals} from './object.js'
 
 import { webgl } from './bin/gl-builder'
 import { useCamera } from './bin/camera'
@@ -46,6 +46,7 @@ async function process(){
     builder.attribute_matrix_3_float.normal = vertexNormals
     builder.attribute_matrix_3_float.position = vertexPosition;
     builder.face = vertexIndexes
+    builder.uniform_4_float.color_overlay = [0.0,0.0,0.0,1.0]
 
     const  cube_id_map = GetCubeIdMap()
 
@@ -54,13 +55,15 @@ async function process(){
     function draw()
     {
         gl.enable(gl.DEPTH_TEST);
-        gl.enable(gl.CULL_FACE);
+        // gl.enable(gl.CULL_FACE);
 
         gl.clearDepth(1.0);
         
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         
         builder.drawSolid()
+
+
     }
 
     step(() => {
@@ -79,6 +82,14 @@ async function process(){
         builder.uniform_float.is_picking_step = 0
         gl.clearColor(0.5, 0.5, 0.5, 0.9);
         draw()
+
+        builder.uniform_float.enable_color_overlay = 1
+
+
+        builder.drawLines(wireframeIndexes)
+
+        
+        builder.uniform_float.enable_color_overlay = 0
     })
 }
 
