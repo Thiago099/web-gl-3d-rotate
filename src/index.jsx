@@ -2,7 +2,7 @@
 import './style.css'
 import {vertexPosition, GetCubeSelectionColor, GetCubeIdMap,vertexIndexes,vertexNormals} from './object.js'
 import {mat4} from 'gl-matrix'
-import { glBuilder } from './bin/gl-builder'
+import { webgl } from './bin/gl-builder'
 const canvas = ref()
 
 const main = 
@@ -36,7 +36,7 @@ var fragCode = await fetch("./shader.frag").then(res=>res.text())
 
 
 
-var shader_builder = glBuilder(canvas.__element)
+var shader_builder = webgl(canvas.__element)
 
 var [gl, builder] = 
     shader_builder
@@ -47,7 +47,7 @@ var [gl, builder] =
 
 builder.attribute.normal = vertexNormals
 builder.attribute.position = vertexPosition;
-builder.element(vertexIndexes)
+builder.indices(vertexIndexes)
 
 const  cube_id_map = GetCubeIdMap()
 
@@ -174,7 +174,7 @@ function draw()
     
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-    builder.drawSolid(vertexIndexes)
+    builder.drawSolid()
 }
 
 var animate = function(time) {
