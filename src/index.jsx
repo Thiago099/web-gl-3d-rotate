@@ -45,8 +45,8 @@ var [gl, builder] =
     .build()
 
 
-builder.attribute_3_float.normal = vertexNormals
-builder.attribute_3_float.position = vertexPosition;
+builder.attribute_matrix_3_float.normal = vertexNormals
+builder.attribute_matrix_3_float.position = vertexPosition;
 builder.face = vertexIndexes
 
 const  cube_id_map = GetCubeIdMap()
@@ -210,9 +210,9 @@ var animate = function(time) {
 
     gl.clearColor(0, 0, 0, 0);
 
-    builder.attribute_4_float.color = cube_id_map;
+    builder.attribute_matrix_4_float.color = cube_id_map;
 
-    builder.uniform_1_float.is_picking_step = 1
+    builder.uniform_float.is_picking_step = 1
 
 
     draw()
@@ -220,8 +220,8 @@ var animate = function(time) {
     const pixelX = mouseX * gl.canvas.width / gl.canvas.clientWidth;
     const pixelY = gl.canvas.height - mouseY * gl.canvas.height / gl.canvas.clientHeight - 1;
 
-    builder.attribute_4_float.color = GetCubeSelectionColor(builder.getPixel(pixelX, pixelY));
-    builder.uniform_1_float.is_picking_step = 0
+    builder.attribute_matrix_4_float.color = GetCubeSelectionColor(builder.getPixel(pixelX, pixelY));
+    builder.uniform_float.is_picking_step = 0
     gl.clearColor(0.5, 0.5, 0.5, 0.9);
     draw()
     window.requestAnimationFrame(animate);
