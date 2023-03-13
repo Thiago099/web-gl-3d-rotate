@@ -1,8 +1,9 @@
 
 import './style.css'
 import {vertexPosition, GetCubeSelectionColor, GetCubeIdMap,vertexIndexes,vertexNormals} from './object.js'
-import {mat4} from 'gl-matrix'
+import { mat4 } from 'gl-matrix'
 import { webgl } from './bin/gl-builder'
+
 const canvas = ref()
 
 const main = 
@@ -20,7 +21,6 @@ const main =
         </p>
     </div>
 </div>
-
 
 canvas.width = 500
 canvas.height = 500

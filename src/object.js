@@ -1,8 +1,3 @@
-
-
-
-
-
 function GetCubeIdMap()
 {
     var colors = [];
@@ -50,7 +45,7 @@ function color_2_id(color)
 {
     return (
         color[0] +
-        (color[1] <<  8 )+
+        (color[1] <<  8 ) +
         (color[2] << 16)
     ) - 1
 }
