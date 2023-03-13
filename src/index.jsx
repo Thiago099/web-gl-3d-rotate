@@ -1,9 +1,9 @@
 
 import './style.css'
-import {BindVertexBuffer, BindSelectionQuadColor, UseBindQuadSelectionColorBuffer,UseDraw,addNormals} from './object.js'
+import {vertexPosition, GetCubeSelectionColor, GetCubeIdMap,vertexIndexes,vertexNormals} from './object.js'
 import {mat4} from 'gl-matrix'
+import { glBuilder } from './bin/gl-builder'
 const canvas = ref()
-
 
 const main = 
 <div class="main">
@@ -28,66 +28,28 @@ canvas.height = 500
 main.$parent(document.body)
 
 
-/*============= Creating a canvas ======================*/
-var gl = canvas.__element.getContext('webgl');
-
-/*========== Defining and storing the geometry ==========*/
-
-
-
-
-// Create and store data into color buffer
-
-
-// Create and store data into index buffer
-
-
-// // Create and store data into index buffer
-// var normal_buffer = gl.createBuffer ();
-// gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, normal_buffer);
-// gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(normals), gl.STATIC_DRAW);
-
-
-/*=================== SHADERS =================== */
 async function process(){
 var vertCode = await fetch("./shader.vert").then(res=>res.text())
 var fragCode = await fetch("./shader.frag").then(res=>res.text())
 
 
 
-var vertShader = gl.createShader(gl.VERTEX_SHADER);
-gl.shaderSource(vertShader, vertCode);
-gl.compileShader(vertShader);
-
-var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
-gl.shaderSource(fragShader, fragCode);
-gl.compileShader(fragShader);
-
-var shaderprogram = gl.createProgram();
-gl.attachShader(shaderprogram, vertShader);
-
-gl.attachShader(shaderprogram, fragShader);
-gl.linkProgram(shaderprogram);
-
-/*======== Associating attributes to vertex shader =====*/
-var _projection_matrix = gl.getUniformLocation(shaderprogram, "projection_matrix");
-var _view_matrix = gl.getUniformLocation(shaderprogram, "view_matrix");
-var _model_matrix = gl.getUniformLocation(shaderprogram, "model_matrix");
-var _normal_matrix = gl.getUniformLocation(shaderprogram, "uNormalMatrix");
-var _VertexNormal = gl.getAttribLocation(shaderprogram, "normal")
-
-var _IsPickingStep = gl.getUniformLocation(shaderprogram, "isPickingStep")
 
 
-BindVertexBuffer(gl,shaderprogram, "position")
+var shader_builder = glBuilder(canvas.__element)
 
-// gl.bindBuffer(gl.ARRAY_BUFFER, normal_buffer);
-// var _normal = gl.getAttribLocation(shaderprogram, "normal");
-// gl.vertexAttribPointer(_normal, 3, gl.FLOAT, false,0,0);
-// gl.enableVertexAttribArray(_normal);
+var [gl, builder] = 
+    shader_builder
+    .vertexShader(vertCode)
+    .fragmentShader(fragCode)
+    .build()
 
 
-gl.useProgram(shaderprogram);
+builder.attribute.normal = vertexNormals
+builder.attribute.position = vertexPosition;
+builder.element(vertexIndexes)
+
+const  cube_id_map = GetCubeIdMap()
 
 /*==================== MATRIX ====================== */
 
@@ -109,14 +71,11 @@ const normalMatrix = mat4.create();
 mat4.invert(normalMatrix, view_matrix);
 mat4.transpose(normalMatrix, normalMatrix);
 
-const  BindQuadSelectionColorBuffer = UseBindQuadSelectionColorBuffer(gl,shaderprogram)
+
 gl.viewport(0.0, 0.0, canvas.width, canvas.height);
-gl.uniformMatrix4fv(
-    _normal_matrix,
-    false,
-    normalMatrix
-  );
-  BindQuadSelectionColorBuffer()
+
+builder.uniform_4_float.uNormalMatrix = normalMatrix
+
 
 view_matrix[14] = view_matrix[14]-6;
 
@@ -204,12 +163,9 @@ function rotateY(m, angle) {
 
 var THETA = 0,
 PHI = 0;
-var time_old = 0;
 
 
 
-
-const GlDraw = UseDraw(gl)
 function draw()
 {
     gl.enable(gl.DEPTH_TEST);
@@ -218,9 +174,7 @@ function draw()
     
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-    addNormals(gl,_VertexNormal) 
-    
-    GlDraw(gl)
+    builder.drawSolid(vertexIndexes)
 }
 
 var animate = function(time) {
@@ -248,37 +202,28 @@ var animate = function(time) {
     rotateY(mo_matrix, THETA);
     rotateX(mo_matrix, PHI);
 
-    time_old = time; 
 
-
-    gl.uniformMatrix4fv(_projection_matrix, false, proj_matrix);
-    gl.uniformMatrix4fv(_view_matrix, false, view_matrix);
-    gl.uniformMatrix4fv(_model_matrix, false, mo_matrix);
+    builder.uniform_4_float.projection_matrix = proj_matrix
+    builder.uniform_4_float.view_matrix = view_matrix
+    builder.uniform_4_float.model_matrix = mo_matrix
 
 
     gl.clearColor(0, 0, 0, 1);
-    BindQuadSelectionColorBuffer()
-    gl.uniform1f(_IsPickingStep, 0);
+
+    builder.attribute.color = cube_id_map;
+
+    builder.uniform_1_float.isPickingStep = 0
 
 
     draw()
     
     const pixelX = mouseX * gl.canvas.width / gl.canvas.clientWidth;
     const pixelY = gl.canvas.height - mouseY * gl.canvas.height / gl.canvas.clientHeight - 1;
-    const data = new Uint8Array(4);
-    gl.readPixels(
-        pixelX,            // x
-        pixelY,            // y
-        1,                 // width
-        1,                 // height
-        gl.RGBA,           // format
-        gl.UNSIGNED_BYTE,  // type
-        data);             // typed array to hold result
 
-    BindSelectionQuadColor(gl,shaderprogram,data)
-    gl.uniform1f(_IsPickingStep, 1);
-
-    draw(data)
+    builder.attribute.color = GetCubeSelectionColor(builder.getPixel(pixelX, pixelY));
+    builder.uniform_1_float.isPickingStep = 1
+    gl.clearColor(0.5, 0.5, 0.5, 0.9);
+    draw()
     window.requestAnimationFrame(animate);
 }
 animate(0);
