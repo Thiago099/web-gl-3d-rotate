@@ -1,24 +1,23 @@
 attribute vec3 position;
 attribute vec3 normal;
+attribute vec3 color;
 
 uniform mat4 projection_matrix;
 uniform mat4 view_matrix;
 uniform mat4 model_matrix;
 uniform mat4 uNormalMatrix;
-uniform float isPickingStep;
+uniform float is_picking_step;
 
-attribute vec3 color;
 varying vec3 vColor;
-
 varying highp vec3 vLighting;
-void main(void) { 
 
+void main(void) { 
 
         
     gl_Position = projection_matrix*view_matrix*model_matrix*vec4(position, 1.);
     vColor = color;
 
-    if(isPickingStep == 0.0)
+    if(is_picking_step == 1.0)
     {
         vLighting = vec3(1.0, 1.0, 1.0);
     }

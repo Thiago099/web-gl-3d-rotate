@@ -54,13 +54,14 @@ class attributeBuilder
             this.gl.enableVertexAttribArray(attribute);
         })
     }
-    indices(indices)
+    set face(faces)
     {
         var index_buffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, index_buffer);
-        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), this.gl.STATIC_DRAW);
-        this.indices = indices;
+        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(faces), this.gl.STATIC_DRAW);
+        this.faces = faces;
     }
+
     getPixel(x,y)
     {
         const data = new Uint8Array(4);
@@ -76,11 +77,11 @@ class attributeBuilder
     }
     drawSolid()
     {
-        if(this.indices == undefined)
-            throw "No indices defined";
+        if(this.faces == undefined)
+            throw "No faces defined";
 
         this.gl.getParameter(this.gl.ALIASED_LINE_WIDTH_RANGE)
-        this.gl.drawElements(this.gl.TRIANGLES, this.indices.length, this.gl.UNSIGNED_SHORT, 0);
+        this.gl.drawElements(this.gl.TRIANGLES, this.faces.length, this.gl.UNSIGNED_SHORT, 0);
     }
 }
 
