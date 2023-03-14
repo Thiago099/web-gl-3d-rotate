@@ -35,13 +35,7 @@ async function process(){
     var fragCode = await fetch("./shader.frag").then(res=>res.text())
 
 
-    var shader_builder = webgl(canvas.__element)
-
-    var [gl, builder] = 
-        shader_builder
-        .vertexShader(vertCode)
-        .fragmentShader(fragCode)
-        .build()
+    var [gl, builder] = webgl(canvas.__element,vertCode, fragCode)
 
     builder.antialias = false
 

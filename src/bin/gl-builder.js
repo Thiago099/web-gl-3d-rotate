@@ -1,37 +1,3 @@
-class shaderBuilder
-{
-    constructor(canvas)
-    {
-        this.canvas = canvas;
-        this.gl = canvas.getContext('webgl2', {antialias: true});
-        this.program = this.gl.createProgram();
-    }
-    vertexShader(vertCode)
-    {
-        const gl = this.gl;
-        const vertShader = gl.createShader(gl.VERTEX_SHADER);
-        gl.shaderSource(vertShader, vertCode);
-        gl.compileShader(vertShader);
-        gl.attachShader(this.program, vertShader);
-        return this;
-    }
-    fragmentShader(fragCode)
-    {
-        const gl = this.gl;
-        const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
-        gl.shaderSource(fragShader, fragCode);
-        gl.compileShader(fragShader);
-        gl.attachShader(this.program, fragShader);
-        return this;
-    }
-    build()
-    {
-        const gl = this.gl;
-        gl.linkProgram(this.program);
-        gl.useProgram(this.program);
-        return [gl, new attributeBuilder(gl, this.program, this.canvas)];
-    }
-}
 class attributeBuilder
 {
     constructor(gl, program, canvas)
@@ -165,10 +131,25 @@ function varProxy(callback)
     });
 }
 
-function webgl(canvas)
+function webgl(canvas, vertCode, fragCode)
 {
+    const gl = canvas.getContext('webgl2', {antialias: true});
+    const program = gl.createProgram();
 
-    return new shaderBuilder(canvas);
+    const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fragShader, fragCode);
+    gl.compileShader(fragShader);
+    gl.attachShader(program, fragShader);
+
+    const vertShader = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vertShader, vertCode);
+    gl.compileShader(vertShader);
+    gl.attachShader(program, vertShader);
+
+    gl.linkProgram(program);
+    gl.useProgram(program);
+
+    return [gl, new attributeBuilder(gl, program, canvas)];
 }
 
 
