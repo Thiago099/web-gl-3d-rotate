@@ -57,21 +57,14 @@ async function process(){
 
     function draw()
     {
-
-
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LEQUAL);
-
         gl.enable(gl.CULL_FACE);
-
         gl.clearDepth(1.0);
         
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-
         builder.drawSolid()
-
-
     }
 
     step(() => {
@@ -91,7 +84,11 @@ async function process(){
         builder.attribute_matrix_4_float.color = GetCubeSelectionColor(pixel);
         builder.uniform_float.is_picking_step = 0
         gl.clearColor(0.5, 0.5, 0.5, 0.9);
+
+        gl.enable(gl.POLYGON_OFFSET_FILL);
+        gl.polygonOffset(1.0, 1.0);
         draw()
+        gl.disable(gl.POLYGON_OFFSET_FILL);
 
         builder.uniform_float.enable_color_overlay = 1
 
