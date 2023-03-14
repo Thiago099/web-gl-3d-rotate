@@ -8,25 +8,28 @@ class shaderBuilder
     }
     vertexShader(vertCode)
     {
-        const vertShader = this.gl.createShader(this.gl.VERTEX_SHADER);
-        this.gl.shaderSource(vertShader, vertCode);
-        this.gl.compileShader(vertShader);
-        this.gl.attachShader(this.program, vertShader);
+        const gl = this.gl;
+        const vertShader = gl.createShader(gl.VERTEX_SHADER);
+        gl.shaderSource(vertShader, vertCode);
+        gl.compileShader(vertShader);
+        gl.attachShader(this.program, vertShader);
         return this;
     }
     fragmentShader(fragCode)
     {
-        const fragShader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
-        this.gl.shaderSource(fragShader, fragCode);
-        this.gl.compileShader(fragShader);
-        this.gl.attachShader(this.program, fragShader);
+        const gl = this.gl;
+        const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(fragShader, fragCode);
+        gl.compileShader(fragShader);
+        gl.attachShader(this.program, fragShader);
         return this;
     }
     build()
     {
-        this.gl.linkProgram(this.program);
-        this.gl.useProgram(this.program);
-        return [this.gl, new attributeBuilder(this.gl, this.program, this.canvas)];
+        const gl = this.gl;
+        gl.linkProgram(this.program);
+        gl.useProgram(this.program);
+        return [gl, new attributeBuilder(gl, this.program, this.canvas)];
     }
 }
 class attributeBuilder
@@ -38,36 +41,36 @@ class attributeBuilder
         this.canvas = canvas;
 
         this.attribute_matrix_4_mat_float = varProxy((name, value) => {
-            var location = this.gl.getUniformLocation(this.program, name)
-            this.gl.uniformMatrix4fv(location, false, value)
+            var location = gl.getUniformLocation(this.program, name)
+            gl.uniformMatrix4fv(location, false, value)
         })
         this.uniform_float = varProxy((name, value) => {
-            var location = this.gl.getUniformLocation(this.program, name)
-            this.gl.uniform1f(location, value)
+            var location = gl.getUniformLocation(this.program, name)
+            gl.uniform1f(location, value)
         })
         this.uniform_4_float = varProxy((name, value) => {
-            var location = this.gl.getUniformLocation(this.program, name)
-            this.gl.uniform4f(location, value[0], value[1], value[2], value[3])
+            var location = gl.getUniformLocation(this.program, name)
+            gl.uniform4f(location, value[0], value[1], value[2], value[3])
         })
 
         this.attribute_matrix_3_float = varProxy((name, value) => {
-            var vertex_buffer = this.gl.createBuffer();
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vertex_buffer);
-            this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(value), this.gl.STATIC_DRAW);
+            var vertex_buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(value), gl.STATIC_DRAW);
         
-            var attribute = this.gl.getAttribLocation(this.program, name);
-            this.gl.vertexAttribPointer(attribute, 3, this.gl.FLOAT, false,0,0);
-            this.gl.enableVertexAttribArray(attribute);
+            var attribute = gl.getAttribLocation(this.program, name);
+            gl.vertexAttribPointer(attribute, 3, gl.FLOAT, false,0,0);
+            gl.enableVertexAttribArray(attribute);
         })
 
         this.attribute_matrix_4_float = varProxy((name, value) => {
-            var vertex_buffer = this.gl.createBuffer();
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vertex_buffer);
-            this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(value), this.gl.STATIC_DRAW);
+            var vertex_buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(value), gl.STATIC_DRAW);
         
-            var attribute = this.gl.getAttribLocation(this.program, name);
-            this.gl.vertexAttribPointer(attribute, 4, this.gl.FLOAT, false,0,0);
-            this.gl.enableVertexAttribArray(attribute);
+            var attribute = gl.getAttribLocation(this.program, name);
+            gl.vertexAttribPointer(attribute, 4, gl.FLOAT, false,0,0);
+            gl.enableVertexAttribArray(attribute);
         })
     }
     set face(faces)
@@ -102,19 +105,21 @@ class attributeBuilder
 
     getPixel(x,y)
     {
+        const gl = this.gl;
         const data = new Uint8Array(4);
-        this.gl.readPixels(
+        gl.readPixels(
             x,            // x
             y,            // y
             1,                  // width
             1,                  // height
-            this.gl.RGBA,             // format
-            this.gl.UNSIGNED_BYTE,   // type
+            gl.RGBA,             // format
+            gl.UNSIGNED_BYTE,   // type
             data);              // typed array to hold result
         return data;
     }
     drawSolid(faces)
     {
+        const gl = this.gl;
         if(!faces)
         {
             if(this.faces == undefined)
@@ -123,15 +128,16 @@ class attributeBuilder
                 faces = this.faces;
         }
 
-        var index_buffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, index_buffer);
-        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(faces), this.gl.STATIC_DRAW);
+        var index_buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(faces), gl.STATIC_DRAW);
 
-        this.gl.getParameter(this.gl.ALIASED_LINE_WIDTH_RANGE)
-        this.gl.drawElements(this.gl.TRIANGLES, faces.length, this.gl.UNSIGNED_SHORT, 0);
+        gl.getParameter(gl.ALIASED_LINE_WIDTH_RANGE)
+        gl.drawElements(gl.TRIANGLES, faces.length, gl.UNSIGNED_SHORT, 0);
     }
     drawLines(faces)
     {
+        const gl = this.gl;
         if(!faces)
         {
             if(this.faces == undefined)
@@ -140,12 +146,12 @@ class attributeBuilder
                 faces = this.faces;
         }
 
-        var index_buffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, index_buffer);
-        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(faces), this.gl.STATIC_DRAW);
+        var index_buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(faces), gl.STATIC_DRAW);
 
-        this.gl.getParameter(this.gl.ALIASED_LINE_WIDTH_RANGE)
-        this.gl.drawElements(this.gl.LINES, faces.length, this.gl.UNSIGNED_SHORT, 0);
+        gl.getParameter(gl.ALIASED_LINE_WIDTH_RANGE)
+        gl.drawElements(gl.LINES, faces.length, gl.UNSIGNED_SHORT, 0);
     }
 }
 

@@ -80,7 +80,6 @@ async function process(){
 
         var pixel = null
         builder.buffer(()=>{
-
             gl.clearColor(0, 0, 0, 0);
             builder.attribute_matrix_4_float.color = cube_id_map;
             builder.uniform_float.is_picking_step = 1
