@@ -24,8 +24,8 @@ const main =
     </div>
 </div>
 
-canvas.width = 500
-canvas.height = 500
+canvas.width = 800
+canvas.height = 800
 
 main.$parent(document.body)
 
