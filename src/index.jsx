@@ -43,6 +43,9 @@ async function process(){
         .fragmentShader(fragCode)
         .build()
 
+    builder.antialias = false
+
+
     builder.attribute_matrix_3_float.normal = vertexNormals
     builder.attribute_matrix_3_float.position = vertexPosition;
     builder.face = vertexIndexes
@@ -54,13 +57,18 @@ async function process(){
 
     function draw()
     {
+
+
         gl.enable(gl.DEPTH_TEST);
-        // gl.enable(gl.CULL_FACE);
+        gl.depthFunc(gl.LEQUAL);
+
+        gl.enable(gl.CULL_FACE);
 
         gl.clearDepth(1.0);
         
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        
+
+
         builder.drawSolid()
 
 
@@ -70,21 +78,23 @@ async function process(){
 
         update()
 
-        gl.clearColor(0, 0, 0, 0);
+        var pixel = null
+        builder.buffer(()=>{
 
-        builder.attribute_matrix_4_float.color = cube_id_map;
+            gl.clearColor(0, 0, 0, 0);
+            builder.attribute_matrix_4_float.color = cube_id_map;
+            builder.uniform_float.is_picking_step = 1
+            draw()
+            pixel = builder.getPixel(mouse.x, mouse.y)
+        })
 
-        builder.uniform_float.is_picking_step = 1
-
-        draw()
         
-        builder.attribute_matrix_4_float.color = GetCubeSelectionColor(builder.getPixel(mouse.x, mouse.y));
+        builder.attribute_matrix_4_float.color = GetCubeSelectionColor(pixel);
         builder.uniform_float.is_picking_step = 0
         gl.clearColor(0.5, 0.5, 0.5, 0.9);
         draw()
 
         builder.uniform_float.enable_color_overlay = 1
-
 
         builder.drawLines(wireframeIndexes)
 

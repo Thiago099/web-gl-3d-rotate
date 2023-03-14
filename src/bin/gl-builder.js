@@ -2,7 +2,8 @@ class shaderBuilder
 {
     constructor(canvas)
     {
-        this.gl = canvas.getContext('webgl');
+        this.canvas = canvas;
+        this.gl = canvas.getContext('webgl2', {antialias: true});
         this.program = this.gl.createProgram();
     }
     vertexShader(vertCode)
@@ -25,15 +26,16 @@ class shaderBuilder
     {
         this.gl.linkProgram(this.program);
         this.gl.useProgram(this.program);
-        return [this.gl, new attributeBuilder(this.gl, this.program)];
+        return [this.gl, new attributeBuilder(this.gl, this.program, this.canvas)];
     }
 }
 class attributeBuilder
 {
-    constructor(gl, program)
+    constructor(gl, program, canvas)
     {
         this.gl = gl;
         this.program = program;
+        this.canvas = canvas;
 
         this.attribute_matrix_4_mat_float = varProxy((name, value) => {
             var location = this.gl.getUniformLocation(this.program, name)
@@ -72,6 +74,31 @@ class attributeBuilder
     {
         this.faces = faces;
     }
+
+    buffer(callback)
+    {
+        const gl = this.gl;
+        const canvas = this.canvas;
+        // Create a framebuffer object
+        const framebuffer = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+
+        // Create a texture object to attach to the framebuffer
+        const texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, canvas.width, canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+
+        callback();
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+        return texture;
+
+    }
+    
 
     getPixel(x,y)
     {
